@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Кулинария</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: Georgia, serif; background: #fff; color: #222; }
+  header { text-align: center; padding: 20px; background: #8a5a3b url('parallax.jpg') center/cover; color: #fff; }
+  .logo { font-size: 24px; font-weight: bold; color: #fff; text-decoration: none; }
+  nav ul { list-style: none; display: flex; justify-content: center; gap: 24px; padding: 0; margin: 12px 0; }
+  nav a { color: #fff; text-decoration: none; font-weight: bold; }
+  .search input { padding: 8px; width: 240px; }
+  .search button { padding: 8px 14px; cursor: pointer; }
+  main { max-width: 400px; margin: 20px auto; padding: 0 12px; }
+  .recipe { border: 1px solid #ddd; padding: 16px; margin-bottom: 20px; text-align: center; }
+  .recipe img { width: 100%; max-width: 230px; height: 185px; object-fit: cover; }
+  .recipe a { color: #e8452c; font-weight: bold; text-decoration: none; }
+  #music-btn { position: fixed; right: 16px; bottom: 16px; padding: 10px 14px; border: 0;
+    border-radius: 20px; background: #e8452c; color: #fff; cursor: pointer; font-size: 15px; }
+</style>
+</head>
+<body>
+
+<!-- Фоновая музыка: без autoplay, запускается скриптом ниже -->
+<audio id="background-music" loop>
+  <source src="once-in-paris.mp3" type="audio/mpeg">
+</audio>
+
+<header>
+  <a href="Главная.html" class="logo">Кулинарный сайт</a>
+  <nav>
+    <ul>
+      <li><a href="Главная.html">Рецепты</a></li>
+      <li><a href="Ингредиенты.html">Ингредиенты</a></li>
+      <li><a href="КулинарныеСоветы.html">Кулинарные советы</a></li>
+    </ul>
+  </nav>
+  <div class="search">
+    <input type="text" id="searchInput" placeholder="Поиск...">
+    <button onclick="searchRecipes()">Найти</button>
+  </div>
+</header>
+
+<main>
+  <div class="recipe">
+    <img src="recipe1.jpg" alt="Борщ" data-fallback="borsch">
+    <h2>Борщ</h2>
+    <p>Очень вкусный и сытный борщ.</p>
+    <a href="#" onclick="showRecipe('Борщ', 'recipe1.jpg', 'Борщ — разновидность супа на основе свёклы, которая придаёт ему яркий красный цвет.'); return false;">Подробнее</a>
+  </div>
+  <div class="recipe">
+    <img src="recipe2.jpg" alt="Пицца" data-fallback="pizza">
+    <h2>Пицца</h2>
+    <p>Домашняя пицца с овощами.</p>
+    <a href="#" onclick="showRecipe('Пицца', 'recipe2.jpg', 'Пицца с хрустящим тестом и овощами.'); return false;">Подробнее</a>
+  </div>
+</main>
+
+<button id="music-btn" type="button">🔇 Включить музыку</button>
+
+<script>
+  const music = document.getElementById('background-music');
+  const btn = document.getElementById('music-btn');
+
+  function updateBtn() {
+    btn.textContent = music.paused ? '🔇 Включить музыку' : '🔊 Выключить музыку';
+  }
+
+  // Первая попытка: если браузер разрешил автовоспроизведение, всё сработает сразу
+  music.play().then(updateBtn).catch(() => {
+    // Заблокировано: запускаем при первом действии пользователя
+    const events = ['click', 'keydown', 'scroll', 'touchstart'];
+    const start = () => {
+      music.play().then(updateBtn).catch(() => {});
+      events.forEach(e => document.removeEventListener(e, start));
+    };
+    events.forEach(e => document.addEventListener(e, start, { once: false }));
+  });
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    music.paused ? music.play() : music.pause();
+    updateBtn();
+  });
+  music.addEventListener('play', updateBtn);
+  music.addEventListener('pause', updateBtn);
+
+
+  // Если фото (recipe1.jpg, recipe2.jpg) не найдено рядом с файлом, показываем нарисованную картинку
+  const svg = (body) => 'data:image/svg+xml;utf8,' + encodeURIComponent(
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230 185"><rect width="230" height="185" fill="#f3e9dc"/>' + body + '</svg>');
+  const fallbacks = {
+    borsch: svg('<ellipse cx="115" cy="150" rx="85" ry="10" fill="#d8c7b2"/>' +
+      '<path d="M30 80h170a85 70 0 0 1-170 0z" fill="#7a4a2b"/>' +
+      '<ellipse cx="115" cy="80" rx="85" ry="16" fill="#a3111f"/>' +
+      '<ellipse cx="115" cy="80" rx="30" ry="8" fill="#fff"/>' +
+      '<circle cx="80" cy="78" r="4" fill="#4c8c2b"/><circle cx="150" cy="82" r="4" fill="#4c8c2b"/>' +
+      '<circle cx="115" cy="78" r="3" fill="#2f6b1c"/>'),
+    pizza: svg('<circle cx="115" cy="92" r="72" fill="#d9a441"/>' +
+      '<circle cx="115" cy="92" r="62" fill="#e8452c"/><circle cx="115" cy="92" r="58" fill="#f6c34a"/>' +
+      '<circle cx="90" cy="75" r="10" fill="#b3261e"/><circle cx="135" cy="85" r="10" fill="#b3261e"/>' +
+      '<circle cx="105" cy="118" r="10" fill="#b3261e"/><circle cx="140" cy="115" r="6" fill="#4c8c2b"/>' +
+      '<circle cx="85" cy="102" r="6" fill="#4c8c2b"/><circle cx="118" cy="60" r="6" fill="#4c8c2b"/>')
+  };
+  document.querySelectorAll('img[data-fallback]').forEach(img => {
+    const use = () => { img.onerror = null; img.src = fallbacks[img.dataset.fallback]; };
+    img.onerror = use;
+    if (img.complete && img.naturalWidth === 0) use();
+  });
+
+  // Заглушки, если в вашем коде эти функции уже есть, оставьте свои
+  function searchRecipes() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    document.querySelectorAll('.recipe').forEach(r => {
+      r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+  function showRecipe(title, img, text) { alert(title + '\n\n' + text); }
+</script>
+</body>
+</html>
